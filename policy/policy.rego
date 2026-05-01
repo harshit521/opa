@@ -1,13 +1,17 @@
-package main
+package cicd
 
-# Deny if public access is enabled
 deny[msg] {
-    input.public == true
-    msg := "Public access is not allowed"
+    input.course_price < 0
+    msg := "Course price cannot be negative"
 }
 
-# Deny if environment is not production-safe
+deny[msg] {
+    input.isPublished == true
+    input.content_missing == true
+    msg := "Published course must have content"
+}
+
 deny[msg] {
     input.env != "prod"
-    msg := "Deployment from dev environment is not allowed"
+    msg := "Deployment allowed only in production"
 }

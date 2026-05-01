@@ -1,26 +1,55 @@
 package auth
 
-allow if{
-    input.user.role == "admin"
+default allow = false
+
+# =========================
+# INSTRUCTOR
+# =========================
+
+allow if {
+    input.role == "instructor"
+    input.action == "create"
 }
 
-# Manager → read/write reports
-allow if{
-    input.user.role == "manager"
-    input.resource == "reports"
-    input.action == "read"
+allow if {
+    input.role == "instructor"
+    input.action == "update"
+    input.course_owner == input.user
 }
 
-allow if{
-    input.user.role == "manager"
-    input.resource == "reports"
-    input.action == "write"
+allow if {
+    input.role == "instructor"
+    input.action == "delete"
+    input.course_owner == input.user
+    not input.isPublished
 }
 
-# User → read their own profile
-allow if{
-    input.user.role == "user"
-    input.resource == "profile"
-    input.action == "read"
-    input.user.id == input.resource_owner_id
+# =========================
+# STUDENT
+# =========================
+
+allow if {
+    input.role == "student"
+    input.action == "view"
+    input.enrolled == true
+}
+
+# =========================
+# GUEST
+# =========================
+
+allow if {
+    input.role == "guest"
+    input.action == "view"
+    input.isFree == true
+}
+
+# =========================
+# GLOBAL DENY RULE
+# =========================
+
+deny contains msg if {
+    input.action == "delete"
+    input.isPublished == true
+    msg := "Cannot delete a published course"
 }

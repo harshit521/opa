@@ -1,42 +1,34 @@
-const express = require("express");
-const axios = require("axios");
+import express from "express";
+import axios from "axios";
 
 const app = express();
 app.use(express.json());
 
-// Function to ask OPA
-async function checkAccess(user) {
+// Call OPA
+async function checkAccess(input) {
   const response = await axios.post(
     "http://localhost:8181/v1/data/auth/allow",
-    {
-      input: { user }
-    }
+    { input }
   );
   return response.data.result;
 }
 
-//  Public Route
-app.get("/", (req, res) => {
-  res.send("API is running");
-});
-
-// Protected Route
-app.post("/secure", async (req, res) => {
+app.post("/course-access", async (req, res) => {
   try {
-    const user = req.body.user;
+    const input = req.body;
 
-    const allowed = await checkAccess(user);
+    const allowed = await checkAccess(input);
 
-    if (allowed) {
-      return res.json({ message: "Access Granted" });
-    } else {
+    if (!allowed) {
       return res.status(403).json({ message: "Access Denied" });
     }
+
+    res.json({ message: "Access Granted" });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
-// Start Server
+
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
