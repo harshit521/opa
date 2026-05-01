@@ -1,0 +1,6 @@
+{
+    "course_price": 100,
+    "isPublished": true,
+    "content_missing": false,
+    "env": "prod"
+  }
